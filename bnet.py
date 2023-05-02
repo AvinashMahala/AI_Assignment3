@@ -37,6 +37,15 @@ def calculate_probabilities(counts):
     # Calculate the total number of data points
     total_data_points = len(data)
 
+    # Calculate the marginal probabilities of B and C
+
+    p_b = {0: counts.get('B', 0)[0] / total_data_points, 1: counts.get('B', 0)[1] / total_data_points}
+    p_c = {0: counts.get('C', 0)[0] / total_data_points, 1: counts.get('C', 0)[1] / total_data_points}
+
+    # Store the marginal probabilities in the probabilities dictionary
+    probabilities['B'] = p_b
+    probabilities['C'] = p_c
+
     # Calculate P(G|B)
     for g in [0, 1]:
         for b in [0, 1]:
@@ -87,13 +96,37 @@ def display_probabilities(probabilities):
         # Print an empty line to separate the tables for F=0 and F=1
         print()
 
+# Calculate the JPD value using the conditional probability distributions
+def calculate_jpd_value(probabilities, b_value, g_value, c_value, f_value):
+    # Calculate P(B) using the probabilities dictionary
+    p_b = probabilities['B'].get(b_value, 0)
+
+    # Calculate P(G|B) using the probabilities dictionary
+    p_g_given_b = probabilities[(g_value, b_value)]
+
+    # Calculate P(C) using the probabilities dictionary
+    p_c = probabilities['C'].get(c_value, 0)
+
+    # Calculate P(F|G,C) using the probabilities dictionary
+    p_f_given_gc = probabilities[(f_value, g_value, c_value)]
+
+    # Calculate the JPD value using the conditional probability distributions
+    jpd_value = p_b * p_g_given_b * p_c * p_f_given_gc
+
+    # Return the JPD value
+    return jpd_value
+
+
+
 # Entry point of the program
 if __name__ == "__main__":
-    # Check if the correct number of command-line arguments is provided
-    if len(sys.argv) != 2:
+    #Check if the correct number of command-line arguments is provided
+    if len(sys.argv) != 6:
         # Print the correct usage of the program and exit
-        print("Usage: bnet.py <training_data>")
+        print("Usage: bnet.py <training_data> <Bt/Bf> <Gt/Gf> <Ct/Cf> <Ft/Ff>")
         sys.exit(1)
+    #sys_argv = ['z', 'training_data.txt', 'Bt', 'Gf', 'Ct', 'Ff']  #to debug
+
 
     # Load the training data from the file
     training_data_file = sys.argv[1]
@@ -105,6 +138,23 @@ if __name__ == "__main__":
     # Calculate the probabilities using the counts
     probabilities = calculate_probabilities(counts)
 
+    print("\n------------------Task 1----------------------")
     # Display the calculated probabilities in a readable format
     display_probabilities(probabilities)
+    print("------------------Task 1----------------------\n")
 
+    # Parse the command-line arguments for B, G, C, and F values
+    b_value = 1 if sys.argv[2] == 'Bt' else 0
+    g_value = 1 if sys.argv[3] == 'Gt' else 0
+    c_value = 1 if sys.argv[4] == 'Ct' else 0
+    f_value = 1 if sys.argv[5] == 'Ft' else 0
+
+    print("\n------------------Task 2----------------------")
+
+    # Calculate the JPD value using the conditional probability distributions
+    jpd_value = calculate_jpd_value(probabilities, b_value, g_value, c_value, f_value)
+
+    # Display the calculated JPD value
+    print(f"P(B={b_value}, G={g_value}, C={c_value}, F={f_value}) = {jpd_value:.6f}")
+
+    print("\n------------------Task 2----------------------\n")
