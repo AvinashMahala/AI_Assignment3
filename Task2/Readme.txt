@@ -7,11 +7,11 @@ Programming Language: Python
 Version: 3.8
 
 Code Structure:
-1. load_data: Function to read and parse the training data from a file.
-2. count_occurrences: Count the occurrences of various combinations of B, G, C, and F in the data.
-3. calculate_probabilities: Function to calculate the conditional probability tables for the Bayesian network from the training data.
-4. display_probabilities: Display the calculated probabilities in a readable format
-5. calculate_jpd_value: Function to calculate the joint probability distribution (JPD) value for a given set of variable values.
+1. tsk2_load_data: Function to read and parse the training data from a file.
+2. tsk2_count_occurrences: Count the occurrences of various combinations of B, G, C, and F in the data.
+3. tsk2_calculate_probabilities: Function to calculate the conditional probability tables for the Bayesian network from the training data.
+4. tsk2_display_probabilities: Display the calculated probabilities in a readable format
+5. tsk2_calculate_jpd_value: Function to calculate the joint probability distribution (JPD) value for a given set of variable values.
 6. Main Program
 
 How to Run the Code:
