@@ -1,8 +1,6 @@
 import sys
-import itertools
 
-
-# Load the training data from a file and store it as a list of tuples
+#1. Load the training data from a file and store it as a list of tuples
 def load_data(file_path):
     # Open the file with the training data
     with open(file_path, 'r') as f:
@@ -13,7 +11,7 @@ def load_data(file_path):
     # Return the list of tuples containing the training data
     return data
 
-# Count the occurrences of various combinations of B, G, C, and F in the data
+#2. Count the occurrences of various combinations of B, G, C, and F in the data
 def count_occurrences(data):
     # Initialize the counts dictionary with empty dictionaries for B, C, and GC
     counts = {'B': {}, 'C': {}, 'GC': {}}
@@ -32,7 +30,7 @@ def count_occurrences(data):
     # Return the counts dictionary with all occurrences
     return counts
 
-# Calculate the conditional probabilities P(G|B) and P(F|G,C) using the counts
+#3. Calculate the conditional probabilities P(G|B) and P(F|G,C) using the counts
 def calculate_probabilities(counts):
     # Initialize the probabilities dictionary
     probabilities = {}
@@ -72,7 +70,7 @@ def calculate_probabilities(counts):
     # Return the probabilities dictionary with all calculated probabilities
     return probabilities
 
-# Display the calculated probabilities in a readable format
+#4. Display the calculated probabilities in a readable format
 def display_probabilities(probabilities):
     # Print the title for the conditional probability tables
     print("Conditional Probability Tables:\n")
@@ -98,7 +96,7 @@ def display_probabilities(probabilities):
         # Print an empty line to separate the tables for F=0 and F=1
         print()
 
-# Calculate the JPD value using the conditional probability distributions
+#5. Calculate the JPD value using the conditional probability distributions
 def calculate_jpd_value(probabilities, b_value, g_value, c_value, f_value):
     # Calculate P(B) using the probabilities dictionary
     p_b = probabilities['B'].get(b_value, 0)
@@ -118,30 +116,15 @@ def calculate_jpd_value(probabilities, b_value, g_value, c_value, f_value):
     # Return the JPD value
     return jpd_value
 
-# Inference by enumeration
-def inference_by_enumeration(probabilities, query_variables, evidence_variables):
-    query_variables.update(evidence_variables)
-    total_probability = 0.0
 
-    for b in [0, 1]:
-        for g in [0, 1]:
-            for c in [0, 1]:
-                for f in [0, 1]:
-                    merged_dict = {'B': b, 'G': g, 'C': c, 'F': f}
-                    if all(merged_dict[key] == value for key, value in query_variables.items()):
-                        jpd_value = calculate_jpd_value(probabilities, b, g, c, f)
-                        total_probability += jpd_value
-
-    return total_probability
-
-
-# Entry point of the program
+#6. Entry point of the program
 if __name__ == "__main__":
-    # Check if the correct number of command-line arguments is provided
-    if len(sys.argv) < 4 or (len(sys.argv) > 4 and sys.argv[4] != "given"):
+    #Check if the correct number of command-line arguments is provided
+    if len(sys.argv) != 6:
         # Print the correct usage of the program and exit
-        print("Usage: bnet.py <training_data> <query variable values> [given <evidence variable values>]")
+        print("Usage: bnet.py <training_data> <Bt/Bf> <Gt/Gf> <Ct/Cf> <Ft/Ff>")
         sys.exit(1)
+    #sys_argv = ['z', 'training_data.txt', 'Bt', 'Gf', 'Ct', 'Ff']  #to debug
 
     # Load the training data from the file
     training_data_file = sys.argv[1]
@@ -153,17 +136,21 @@ if __name__ == "__main__":
     # Calculate the probabilities using the counts
     probabilities = calculate_probabilities(counts)
 
-    # Parse the command-line arguments for the query and evidence variables
-    query_variables = {var[0]: 1 if var.endswith("t") else 0 for var in sys.argv[2:] if var[0] in "BGCF" and not var.startswith("given")}
-    evidence_variables = {}
-    if "given" in sys.argv:
-        evidence_start = sys.argv.index("given") + 1
-        evidence_variables = {var[0]: 1 if var.endswith("t") else 0 for var in sys.argv[evidence_start:] if var[0] in "BGCF"}
+    # # Display the calculated probabilities in a readable format
+    # display_probabilities(probabilities)
 
 
+    print("\n------------------Task 2----------------------")
+    # Parse the command-line arguments for B, G, C, and F values
+    b_value = 1 if sys.argv[2] == 'Bt' else 0
+    g_value = 1 if sys.argv[3] == 'Gt' else 0
+    c_value = 1 if sys.argv[4] == 'Ct' else 0
+    f_value = 1 if sys.argv[5] == 'Ft' else 0
 
-    # Calculate the probability of the query given the evidence using inference by enumeration
-    probability = inference_by_enumeration(probabilities, query_variables, evidence_variables)
+    # Calculate the JPD value using the conditional probability distributions
+    jpd_value = calculate_jpd_value(probabilities, b_value, g_value, c_value, f_value)
 
-    # Display the calculated probability value
-    print(f"P({', '.join([f'{k}={v}' for k, v in query_variables.items()])} | {', '.join([f'{k}={v}' for k, v in evidence_variables.items()])}) = {probability:.6f}")
+    # Display the calculated JPD value
+    print(f"P(B={b_value}, G={g_value}, C={c_value}, F={f_value}) = {jpd_value:.6f}")
+
+    print("\n------------------Task 2----------------------\n")
