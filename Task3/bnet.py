@@ -1,177 +1,118 @@
 import sys
 import itertools
 
-
 #1. Load the training data from a file and store it as a list of tuples
-def load_data(file_path):
-    # Open the file with the training data
+def tsk3_load_data(file_path):
     with open(file_path, 'r') as f:
-        # Read all lines from the file
         lines = f.readlines()
-        # Convert each line to a tuple of integers and add it to the data list
-        data = [tuple(map(int, line.strip().split())) for line in lines]
-    # Return the list of tuples containing the training data
-    return data
+        tsk3_data = [tuple(map(int, line.strip().split())) for line in lines]
+    return tsk3_data
 
 #2. Count the occurrences of various combinations of B, G, C, and F in the data
-def count_occurrences(data):
-    # Initialize the counts dictionary with empty dictionaries for B, C, and GC
-    counts = {'B': {}, 'C': {}, 'GC': {}}
-    # Iterate through the data (each tuple contains the values of B, G, C, and F)
-    for b, g, c, f in data:
-        # Increment the count for the (B, G) combination
-        counts[(b, g)] = counts.get((b, g), 0) + 1
-        # Increment the count for the (G, C, F) combination
-        counts[(g, c, f)] = counts.get((g, c, f), 0) + 1
-        # Increment the count for the B value
-        counts['B'][b] = counts['B'].get(b, 0) + 1
-        # Increment the count for the C value
-        counts['C'][c] = counts['C'].get(c, 0) + 1
-        # Increment the count for the (G, C) combination
-        counts['GC'][(g, c)] = counts['GC'].get((g, c), 0) + 1
-    # Return the counts dictionary with all occurrences
-    return counts
+def tsk3_count_occurrences(tsk3_data):
+    tsk3_counts = {'B': {}, 'C': {}, 'GC': {}}
+    for b, g, c, f in tsk3_data:
+        tsk3_counts[(b, g)] = tsk3_counts.get((b, g), 0) + 1
+        tsk3_counts[(g, c, f)] = tsk3_counts.get((g, c, f), 0) + 1
+        tsk3_counts['B'][b] = tsk3_counts['B'].get(b, 0) + 1
+        tsk3_counts['C'][c] = tsk3_counts['C'].get(c, 0) + 1
+        tsk3_counts['GC'][(g, c)] = tsk3_counts['GC'].get((g, c), 0) + 1
+    return tsk3_counts
 
 #3. Calculate the conditional probabilities P(G|B) and P(F|G,C) using the counts
-def calculate_probabilities(counts):
-    # Initialize the probabilities dictionary
-    probabilities = {}
-    # Calculate the total number of data points
-    total_data_points = len(data)
+def tsk3_calculate_probabilities(tsk3_counts):
+    tsk3_probabilities = {}
+    tsk3_total_data_points = len(tsk3_data)
 
-    # Calculate the marginal probabilities of B and C
+    tsk3_p_b = {0: tsk3_counts.get('B', 0)[0] / tsk3_total_data_points, 1: tsk3_counts.get('B', 0)[1] / tsk3_total_data_points}
+    tsk3_p_c = {0: tsk3_counts.get('C', 0)[0] / tsk3_total_data_points, 1: tsk3_counts.get('C', 0)[1] / tsk3_total_data_points}
 
-    p_b = {0: counts.get('B', 0)[0] / total_data_points, 1: counts.get('B', 0)[1] / total_data_points}
-    p_c = {0: counts.get('C', 0)[0] / total_data_points, 1: counts.get('C', 0)[1] / total_data_points}
+    tsk3_probabilities['B'] = tsk3_p_b
+    tsk3_probabilities['C'] = tsk3_p_c
 
-    # Store the marginal probabilities in the probabilities dictionary
-    probabilities['B'] = p_b
-    probabilities['C'] = p_c
-
-    # Calculate P(G|B)
     for g in [0, 1]:
         for b in [0, 1]:
-            # Get the count of the (B, G) combination
-            g_and_b_count = counts.get((b, g), 0)
-            # Get the count of the B value
-            b_count = counts['B'].get(b, 0)
-            # Calculate and store the probability P(G|B)
-            probabilities[(g, b)] = g_and_b_count / b_count if b_count > 0 else 0
+            tsk3_g_and_b_count = tsk3_counts.get((b, g), 0)
+            tsk3_b_count = tsk3_counts['B'].get(b, 0)
+            tsk3_probabilities[(g, b)] = tsk3_g_and_b_count / tsk3_b_count if tsk3_b_count > 0 else 0
 
-    # Calculate P(F|G,C)
     for f in [0, 1]:
         for g in [0, 1]:
             for c in [0, 1]:
-                # Get the count of the (G, C) combination
-                gc_count = counts['GC'].get((g, c), 0)
-                # Get the count of the (G, C, F) combination
-                gcf_count = counts.get((g, c, f), 0)
-                # Calculate and store the probability P(F|G,C)
-                probabilities[(f, g, c)] = gcf_count / gc_count if gc_count > 0 else 0
+                tsk3_gc_count = tsk3_counts['GC'].get((g, c), 0)
+                tsk3_gcf_count = tsk3_counts.get((g, c, f), 0)
+                tsk3_probabilities[(f, g, c)] = tsk3_gcf_count / tsk3_gc_count if tsk3_gc_count > 0 else 0
 
-    # Return the probabilities dictionary with all calculated probabilities
-    return probabilities
+    return tsk3_probabilities
 
 #4. Display the calculated probabilities in a readable format
-def display_probabilities(probabilities):
-    # Print the title for the conditional probability tables
+def tsk3_display_probabilities(tsk3_probabilities):
     print("Conditional Probability Tables:\n")
 
-    # Print the P(G|B) probabilities
     print("P(G|B):")
     for g in [0, 1]:
         for b in [0, 1]:
-            # Print the probability P(G=g|B=b) with two decimal places
-            print(f"P(G={g}|B={b}) = {probabilities[(g, b)]:.2f}", end=' ')
-        # Print a new line for the next row of probabilities
+            print(f"P(G={g}|B={b}) = {tsk3_probabilities[(g, b)]:.2f}", end=' ')
         print()
 
-    # Print the P(F|G,C) probabilities
     print("\nP(F|G,C):")
     for f in [0, 1]:
         for g in [0, 1]:
             for c in [0, 1]:
-                # Print the probability P(F=f|G=g,C=c) with two decimal places
-                print(f"P(F={f}|G={g},C={c}) = {probabilities[(f, g, c)]:.2f}", end=' ')
-            # Print a new line for the next row of probabilities
+                print(f"P(F={f}|G={g},C={c}) = {tsk3_probabilities[(f, g, c)]:.2f}", end=' ')
             print()
-        # Print an empty line to separate the tables for F=0 and F=1
         print()
 
 #5. Calculate the JPD value using the conditional probability distributions
-def calculate_jpd_value(probabilities, b_value, g_value, c_value, f_value):
-    # Calculate P(B) using the probabilities dictionary
-    p_b = probabilities['B'].get(b_value, 0)
+def tsk3_calculate_jpd_value(tsk3_probabilities, b_value, g_value, c_value, f_value):
+    tsk3_p_b = tsk3_probabilities['B'].get(b_value, 0)
+    tsk3_p_g_given_b = tsk3_probabilities[(g_value, b_value)]
+    tsk3_p_c = tsk3_probabilities['C'].get(c_value, 0)
+    tsk3_p_f_given_gc = tsk3_probabilities[(f_value, g_value, c_value)]
 
-    # Calculate P(G|B) using the probabilities dictionary
-    p_g_given_b = probabilities[(g_value, b_value)]
+    tsk3_jpd_value = tsk3_p_b * tsk3_p_g_given_b * tsk3_p_c * tsk3_p_f_given_gc
 
-    # Calculate P(C) using the probabilities dictionary
-    p_c = probabilities['C'].get(c_value, 0)
-
-    # Calculate P(F|G,C) using the probabilities dictionary
-    p_f_given_gc = probabilities[(f_value, g_value, c_value)]
-
-    # Calculate the JPD value using the conditional probability distributions
-    jpd_value = p_b * p_g_given_b * p_c * p_f_given_gc
-
-    # Return the JPD value
-    return jpd_value
+    return tsk3_jpd_value
 
 #6. Inference by enumeration
-def inference_by_enumeration(probabilities, query_variables, evidence_variables):
-    query_variables.update(evidence_variables)
-    total_probability = 0.0
+def tsk3_inference_by_enumeration(tsk3_probabilities, tsk3_query_variables, tsk3_evidence_variables):
+    tsk3_query_variables.update(tsk3_evidence_variables)
+    tsk3_total_probability = 0.0
 
     for b in [0, 1]:
         for g in [0, 1]:
             for c in [0, 1]:
                 for f in [0, 1]:
-                    merged_dict = {'B': b, 'G': g, 'C': c, 'F': f}
-                    if all(merged_dict[key] == value for key, value in query_variables.items()):
-                        jpd_value = calculate_jpd_value(probabilities, b, g, c, f)
-                        total_probability += jpd_value
+                    tsk3_merged_dict = {'B': b, 'G': g, 'C': c, 'F': f}
+                    if all(tsk3_merged_dict[key] == value for key, value in tsk3_query_variables.items()):
+                        tsk3_jpd_value = tsk3_calculate_jpd_value(tsk3_probabilities, b, g, c, f)
+                        tsk3_total_probability += tsk3_jpd_value
 
-    return total_probability
-
+    return tsk3_total_probability
 
 #7. Entry point of the program
 if __name__ == "__main__":
-    # Check if the correct number of command-line arguments is provided
     if len(sys.argv) < 4 or (len(sys.argv) > 4 and sys.argv[4] != "given"):
-        # Print the correct usage of the program and exit
         print("Usage: bnet.py <training_data> <query variable values> [given <evidence variable values>]")
         sys.exit(1)
 
-    # Load the training data from the file
-    training_data_file = sys.argv[1]
-    data = load_data(training_data_file)
+    tsk3_training_data_file = sys.argv[1]
+    tsk3_data = tsk3_load_data(tsk3_training_data_file)
 
-    # Count the occurrences of various combinations in the data
-    counts = count_occurrences(data)
-
-    # Calculate the probabilities using the counts
-    probabilities = calculate_probabilities(counts)
-
-    # Display the calculated probabilities in a readable format
-    # display_probabilities(probabilities)
-
-
+    tsk3_counts = tsk3_count_occurrences(tsk3_data)
+    tsk3_probabilities = tsk3_calculate_probabilities(tsk3_counts)
 
     print("\n------------------Task 3----------------------")
-    # Parse the command-line arguments for the query and evidence variables
-    query_variables = {var[0]: 1 if var.endswith("t") else 0 for var in sys.argv[2:] if var[0] in "BGCF" and not var.startswith("given")}
-    evidence_variables = {}
+    tsk3_query_variables = {var[0]: 1 if var.endswith("t") else 0 for var in sys.argv[2:] if var[0] in "BGCF" and not var.startswith("given")}
+    tsk3_evidence_variables = {}
     if "given" in sys.argv:
-        evidence_start = sys.argv.index("given") + 1
-        evidence_variables = {var[0]: 1 if var.endswith("t") else 0 for var in sys.argv[evidence_start:] if var[0] in "BGCF"}
+        tsk3_evidence_start = sys.argv.index("given") + 1
+        tsk3_evidence_variables = {var[0]: 1 if var.endswith("t") else 0 for var in sys.argv[tsk3_evidence_start:] if var[0] in "BGCF"}
 
+    tsk3_probability = tsk3_inference_by_enumeration(tsk3_probabilities, tsk3_query_variables, tsk3_evidence_variables)
 
-
-    # Calculate the probability of the query given the evidence using inference by enumeration
-    probability = inference_by_enumeration(probabilities, query_variables, evidence_variables)
-
-    # Display the calculated probability value
-    print(f"P({', '.join([f'{k}={v}' for k, v in query_variables.items()])} | {', '.join([f'{k}={v}' for k, v in evidence_variables.items()])}) = {probability:.6f}")
+    print(f"P({', '.join([f'{k}={v}' for k, v in tsk3_query_variables.items()])} | {', '.join([f'{k}={v}' for k, v in tsk3_evidence_variables.items()])}) = {tsk3_probability:.6f}")
 
     print("\n------------------Task 3----------------------")
+
+
